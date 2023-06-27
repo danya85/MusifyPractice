@@ -8,6 +8,7 @@ using Logic.ServiceLayer.IServices;
 using Logic.ServiceLayer.Services;
 using Data.RepositoryLayer.IRepository;
 using Data.RepositoryLayer.Repository;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,17 +18,49 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(
         options => options.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Test"));
 
+
+// ADD Dependencies here
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
+
+
+// STOP adding dependency
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
-//TO DO: Update Swagger documentation with Bearer Token
-builder.Services.AddSwaggerGen();
 
-//TO DO: Use configurable options
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Endpoints", Version = "v1" });
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
+                {
+                        new OpenApiSecurityScheme
+                        {
+                                Reference = new OpenApiReference
+                                {
+                                        Type=ReferenceType.SecurityScheme,
+                                        Id="Bearer"
+                                }
+                        },
+                        new string[]{}
+                }
+        });
+});
+
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
