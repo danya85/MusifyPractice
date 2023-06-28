@@ -1,8 +1,8 @@
-﻿namespace API.PresentationLayer.DTOModels
+﻿namespace API.PresentationLayer.DTOModels;
+
+public class UserDTO
 {
-    public class UserDTO
-    {
-        public int Id { get; set; }
-        public string Email { get; set; }
-    }
+    public int Id { get; set; }
+
+    public string Email { get; set; }
 }
